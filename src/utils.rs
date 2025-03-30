@@ -33,6 +33,7 @@ pub fn flush(addr: *const u8) {
     }
 }
 
-pub fn evict(addr: *const u8) {
+#[allow(dead_code)]
+pub fn evict(_addr: *const u8) {
     // because clflush is not working try with eviction sets
 }

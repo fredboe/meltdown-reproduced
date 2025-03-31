@@ -12,7 +12,7 @@ pub fn measure_access_time(ptr: *const u8) -> u64 {
     let start = get_time();
     access(ptr);
     let end = get_time();
-    flush(ptr);
+    // flush(ptr);
     end - start
 }
 

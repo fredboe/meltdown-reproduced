@@ -14,15 +14,24 @@ impl FlushReload {
         FlushReload { buffer }
     }
 
+    pub fn reset(&self) {
+        for idx in (0..BUFFER_SIZE).step_by(PAGE_SIZE) {
+            unsafe {
+                utils::flush(self.buffer.as_ptr().add(idx));
+            }
+        }
+    }
+
     pub fn leak(&self, x: u8) {
         let access_ptr = unsafe { self.buffer.as_ptr().add(x as usize * PAGE_SIZE) };
         utils::access(access_ptr);
     }
 
     pub fn get(&self) -> Option<u8> {
-        let access_times = (0..BYTE_SIZE)
+        let access_times = (0..BUFFER_SIZE)
+            .step_by(PAGE_SIZE)
             .map(|idx| {
-                let access_ptr = unsafe { self.buffer.as_ptr().add(idx * PAGE_SIZE) };
+                let access_ptr = unsafe { self.buffer.as_ptr().add(idx) };
                 utils::measure_access_time(access_ptr)
             })
             .collect::<Vec<_>>();
@@ -33,6 +42,8 @@ impl FlushReload {
             .min_by_key(|(_, val)| *val)
             .map(|(idx, _)| idx);
 
-        secret.map(|idx| idx as u8)
+        let result = secret.map(|idx| idx as u8);
+        self.reset();
+        result
     }
 }

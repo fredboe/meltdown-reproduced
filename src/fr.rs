@@ -14,6 +14,11 @@ impl FlushReload {
         FlushReload { buffer }
     }
 
+    pub fn leak(&self, x: u8) {
+        self.reset();
+        self.leak_without_prev_reset(x);
+    }
+
     pub fn reset(&self) {
         for idx in (0..BUFFER_SIZE).step_by(PAGE_SIZE) {
             unsafe {
@@ -22,7 +27,7 @@ impl FlushReload {
         }
     }
 
-    pub fn leak(&self, x: u8) {
+    pub fn leak_without_prev_reset(&self, x: u8) {
         let access_ptr = unsafe { self.buffer.as_ptr().add(x as usize * PAGE_SIZE) };
         utils::access(access_ptr);
     }

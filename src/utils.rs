@@ -1,7 +1,13 @@
 use std::arch::x86_64;
 use std::ptr;
 
-pub fn access(ptr: *const u8) {
+pub fn access_unserialized(ptr: *const u8) {
+    unsafe {
+        let _x = ptr::read_volatile(ptr);
+    }
+}
+
+pub fn access_serialized(ptr: *const u8) {
     unsafe {
         let _x = ptr::read_volatile(ptr);
         x86_64::_mm_mfence();
@@ -10,17 +16,15 @@ pub fn access(ptr: *const u8) {
 
 pub fn measure_access_time(ptr: *const u8) -> u64 {
     let start = get_time();
-    access(ptr);
+    access_serialized(ptr);
     let end = get_time();
-    // flush(ptr);
     end - start
 }
 
 pub fn get_time() -> u64 {
     unsafe {
-        x86_64::_mm_mfence();
-        let time = x86_64::_rdtsc();
-        x86_64::_mm_mfence();
+        let mut aux = 0;
+        let time = x86_64::__rdtscp(&mut aux);
         time
     }
 }

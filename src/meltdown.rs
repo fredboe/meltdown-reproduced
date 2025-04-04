@@ -13,11 +13,10 @@ impl MeltdownUS {
         }
     }
 
+    #[inline(always)]
     fn cause_transient_window() {
         unsafe {
-            let null_ptr: *mut u8 = std::ptr::null_mut();
-            *null_ptr = 0;
-            std::hint::black_box(null_ptr);
+            core::ptr::write_volatile(std::ptr::null_mut(), 42);
         }
     }
 

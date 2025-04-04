@@ -34,17 +34,15 @@ impl FlushReload {
 
     pub fn get(&self) -> Option<u8> {
         let access_times = (0..BYTE_SIZE)
-            .map(|idx| (113 * idx + 1) % 256) // iterate pseudorandomly
-            .map(|idx| idx * PAGE_SIZE)
+            .map(|idx| (113 * idx + 1) % BYTE_SIZE) // iterate "pseudorandomly"
             .map(|idx| {
-                let access_ptr = unsafe { self.buffer.as_ptr().add(idx) };
-                utils::measure_access_time(access_ptr)
+                let access_ptr = unsafe { self.buffer.as_ptr().add(idx * PAGE_SIZE) };
+                (idx, utils::measure_access_time(access_ptr))
             })
             .collect::<Vec<_>>();
 
         let secret = access_times
             .into_iter()
-            .enumerate()
             .min_by_key(|(_, val)| *val)
             .map(|(idx, _)| idx);
 
